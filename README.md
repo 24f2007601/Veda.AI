@@ -4,6 +4,19 @@
 
 ---
 
+## 🔑 Demo Educator Credentials
+
+For quick demo testing, use the built-in 1-click **Autofill Demo Login** button or sign in with:
+
+| Field | Demo Credential |
+| :--- | :--- |
+| **Email** | `madhur.rastogi@dpsbokaro.edu.in` |
+| **Password** | `teacher2026` |
+| **School** | `Delhi Public School, Bokaro Steel City` |
+| **Role** | `Senior Evaluator` |
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -27,6 +40,10 @@
    Copy the example environment file:
    ```bash
    cp .env.example .env.local
+   ```
+   Add your NVIDIA API key (or use the built-in local fallback):
+   ```env
+   NVIDIA_API_KEY=nvapi-your_key_from_build.nvidia.com
    ```
 
 4. **Run the Next.js Development Server**:
@@ -64,84 +81,25 @@ For uploading and serving heavy PDF question papers and high-resolution scanned/
 - **Bucket Structure**:
   - `s3://veda-ai-documents/question-papers/{exam_id}.pdf`
   - `s3://veda-ai-documents/answer-sheets/{student_id}.pdf`
-- **CORS Configuration**:
-  ```json
-  [
-    {
-      "AllowedHeaders": ["*"],
-      "AllowedMethods": ["GET", "PUT", "POST"],
-      "AllowedOrigins": ["http://localhost:3000", "https://your-domain.vercel.app"],
-      "ExposeHeaders": []
-    }
-  ]
-  ```
 
 ---
 
-### 3. AI OCR & Handwriting Evaluation Microservice
+### 3. AI OCR & Handwriting Evaluation Microservice (NVIDIA Nemotron v2)
 Connect the 3-stage pipeline (Upload -> Extraction -> Mapping):
 
-- **OCR Engine**: Tesseract OCR, AWS Textract, or PaddleOCR to convert handwritten student answers to structured text.
-- **LLM Evaluator**: OpenAI GPT-4o / Claude 3.5 Sonnet for step-marking, rubric matching, and generating constructive feedback.
-
-#### Next.js Server Action API Route (`src/app/api/extract/route.js`):
-```js
-import { NextResponse } from 'next/server';
-
-export async function POST(req) {
-  const data = await req.formData();
-  const qpFile = data.get('questionPaper');
-  const asFile = data.get('answerSheet');
-
-  // 1. Upload files to S3 Object Storage
-  // 2. Pass document buffer to AI OCR Pipeline
-  // 3. Store extracted questions and bounding box coordinates in DB
-  
-  return NextResponse.json({
-    success: true,
-    examId: 'exam_101',
-    extractedCount: 14,
-  });
-}
-```
+- **NVIDIA NIM Model**: `meta/llama-3.2-90b-vision-instruct` / `nvidia/llama-3.1-nemotron-70b-instruct`.
+- **Endpoint**: `/api/evaluate` for OCR handwriting recognition, question parsing, and bounding box mapping.
 
 ---
 
-## 🌐 Production Deployment
+## 🌐 Production Deployment (Vercel & Docker)
 
 ### Option A: Vercel (Recommended for Next.js)
 
-1. Push your code to GitHub / GitLab / Bitbucket.
+1. Push your code to GitHub / GitLab.
 2. Import the project in [Vercel Dashboard](https://vercel.com/new).
 3. Set the Environment Variables from `.env.example`.
 4. Click **Deploy**.
-
-### Option B: Docker Container Deployment
-
-```dockerfile
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-
-EXPOSE 3000
-CMD ["node", "server.js"]
-```
-
-Build and run Docker image:
-```bash
-docker build -t veda-ai-dashboard .
-docker run -p 3000:3000 veda-ai-dashboard
-```
 
 ---
 
