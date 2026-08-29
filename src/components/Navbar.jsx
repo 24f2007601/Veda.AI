@@ -11,10 +11,11 @@ import {
   User,
   LogOut,
   Sliders,
-  Check
+  Check,
+  LogIn
 } from 'lucide-react';
 
-export default function Navbar({ onOpenToolkit }) {
+export default function Navbar({ onOpenToolkit, currentUser, onOpenAuthModal, onLogout }) {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(2);
@@ -109,48 +110,63 @@ export default function Navbar({ onOpenToolkit }) {
           <Sparkles className="w-5 h-5 text-gray-700 group-hover:text-[#FF5722] group-hover:rotate-12 transition-transform" />
         </button>
 
-        {/* User Profile Capsule */}
-        <div className="relative ml-1">
-          <button 
-            onClick={() => setProfileOpen(!profileOpen)}
-            className="flex items-center gap-2.5 p-1 pr-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200/60"
-          >
-            {/* User Avatar */}
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-tr from-amber-500 to-orange-600 p-0.5 shadow-xs">
-              <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-white font-bold text-xs overflow-hidden">
-                <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                  <rect width="36" height="36" fill="#1E293B"/>
-                  <circle cx="18" cy="13" r="7" fill="#FDBA74"/>
-                  <path d="M6 32C6 24.268 11.373 18 18 18C24.627 18 30 24.268 30 32H6Z" fill="#0F172A"/>
-                </svg>
+        {/* User Profile Capsule / Sign In Action */}
+        {currentUser ? (
+          <div className="relative ml-1">
+            <button 
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="flex items-center gap-2.5 p-1 pr-2 rounded-full hover:bg-gray-100 transition-colors cursor-pointer border border-gray-200/60"
+            >
+              {/* User Avatar */}
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-tr from-amber-500 to-orange-600 p-0.5 shadow-xs">
+                <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center text-white font-bold text-xs overflow-hidden">
+                  <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                    <rect width="36" height="36" fill="#1E293B"/>
+                    <circle cx="18" cy="13" r="7" fill="#FDBA74"/>
+                    <path d="M6 32C6 24.268 11.373 18 18 18C24.627 18 30 24.268 30 32H6Z" fill="#0F172A"/>
+                  </svg>
+                </div>
               </div>
-            </div>
-            <span className="font-semibold text-sm text-gray-900">Madhur Rastogi</span>
-            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
-          </button>
+              <span className="font-semibold text-sm text-gray-900">{currentUser.name}</span>
+              <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
+            </button>
 
-          {/* Profile Dropdown Menu */}
-          {profileOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-              <div className="px-4 py-2 border-b border-gray-100">
-                <p className="font-bold text-sm text-gray-900">Madhur Rastogi</p>
-                <p className="text-xs text-gray-500">Senior Evaluator • DPS Bokaro</p>
+            {/* Profile Dropdown Menu */}
+            {profileOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="font-bold text-sm text-gray-900">{currentUser.name}</p>
+                  <p className="text-xs text-gray-500">{currentUser.role || 'Educator'} • {currentUser.school || 'DPS Bokaro'}</p>
+                </div>
+                <div className="py-1">
+                  <button className="w-full px-4 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2.5">
+                    <User className="w-4 h-4 text-gray-400" /> Account Settings
+                  </button>
+                  <button className="w-full px-4 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2.5">
+                    <Sliders className="w-4 h-4 text-gray-400" /> Evaluation Preferences
+                  </button>
+                  <div className="border-t border-gray-100 my-1" />
+                  <button 
+                    onClick={() => {
+                      setProfileOpen(false);
+                      onLogout();
+                    }}
+                    className="w-full px-4 py-2 text-left text-xs font-medium text-red-600 hover:bg-red-50 flex items-center gap-2.5"
+                  >
+                    <LogOut className="w-4 h-4 text-red-500" /> Sign Out
+                  </button>
+                </div>
               </div>
-              <div className="py-1">
-                <button className="w-full px-4 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2.5">
-                  <User className="w-4 h-4 text-gray-400" /> Account Settings
-                </button>
-                <button className="w-full px-4 py-2 text-left text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2.5">
-                  <Sliders className="w-4 h-4 text-gray-400" /> Evaluation Preferences
-                </button>
-                <div className="border-t border-gray-100 my-1" />
-                <button className="w-full px-4 py-2 text-left text-xs font-medium text-red-600 hover:bg-red-50 flex items-center gap-2.5">
-                  <LogOut className="w-4 h-4 text-red-500" /> Sign Out
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={onOpenAuthModal}
+            className="flex items-center gap-2 px-4 py-2 bg-[#FF5722] hover:bg-[#E64A19] text-white font-bold text-xs rounded-full shadow-md shadow-orange-500/20 transition-all cursor-pointer"
+          >
+            <LogIn className="w-4 h-4" /> Sign In
+          </button>
+        )}
       </div>
     </header>
   );
