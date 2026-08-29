@@ -13,7 +13,7 @@
 # testing
 /coverage
 
-# next.js
+# next.js build
 /.next/
 /out/
 
@@ -23,14 +23,20 @@
 # misc
 .DS_Store
 *.pem
+*.log
 
-# debug
+# debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# environment variables & secrets (NEVER COMMIT API KEYS)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .env*
 
 # vercel

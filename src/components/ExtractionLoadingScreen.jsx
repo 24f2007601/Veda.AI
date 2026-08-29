@@ -3,47 +3,65 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
 
-export default function ExtractionLoadingScreen({ onCompleteExtraction }) {
+export default function ExtractionLoadingScreen({ qpFile, asFile, onCompleteExtraction }) {
   const [progress, setProgress] = useState(15);
-  const [currentStage, setCurrentStage] = useState('Extracting Question Paper & Answer Sheets...');
+  const [currentStage, setCurrentStage] = useState('Extracting Question Paper & Answer Sheets with NVIDIA Nemotron v2...');
+  const [evalResult, setEvalResult] = useState(null);
 
   useEffect(() => {
-    // Stage 1: Document OCR Scanning
-    const t1 = setTimeout(() => {
-      setProgress(45);
-      setCurrentStage('Parsing question boundaries & marks scheme...');
-    }, 1000);
+    let isMounted = true;
 
-    // Stage 2: Handwriting & Answer Mapping
-    const t2 = setTimeout(() => {
-      setProgress(85);
-      setCurrentStage('Matching student answers against answer key...');
-    }, 2200);
+    async function runLiveEvaluation() {
+      try {
+        // Stage 1: Document OCR Pipeline initialization
+        setTimeout(() => isMounted && setProgress(35), 800);
 
-    // Stage 3: Complete & Transition
-    const t3 = setTimeout(() => {
-      setProgress(100);
-      setCurrentStage('Extraction Complete! Opening Mapping View...');
-    }, 3200);
+        // Prepare FormData
+        const formData = new FormData();
+        if (qpFile?.raw) formData.append('questionPaper', qpFile.raw);
+        if (asFile?.raw) formData.append('answerSheet', asFile.raw);
 
-    const t4 = setTimeout(() => {
-      onCompleteExtraction();
-    }, 3800);
+        // Call Next.js API Route /api/evaluate
+        const res = await fetch('/api/evaluate', {
+          method: 'POST',
+          body: formData
+        });
+
+        const json = await res.json();
+        if (isMounted && json.success) {
+          setEvalResult(json.data);
+          setProgress(85);
+          setCurrentStage('NVIDIA Nemotron v2 OCR completed! Formatting questions...');
+        }
+      } catch (err) {
+        console.error('Extraction API error:', err);
+      } finally {
+        if (isMounted) {
+          setTimeout(() => {
+            setProgress(100);
+            setCurrentStage('Extraction Complete! Opening Mapping View...');
+          }, 2400);
+
+          setTimeout(() => {
+            onCompleteExtraction(evalResult);
+          }, 3200);
+        }
+      }
+    }
+
+    runLiveEvaluation();
 
     return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
+      isMounted = false;
     };
-  }, [onCompleteExtraction]);
+  }, [qpFile, asFile, onCompleteExtraction]);
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 bg-[#F8FAFC] select-none relative overflow-hidden animate-in fade-in duration-300">
       {/* Outer Workspace Frame */}
       <div className="w-full max-w-5xl h-full flex flex-col items-center justify-center p-8 bg-white/70 rounded-3xl border border-gray-200/60 shadow-2xs relative">
         
-        {/* Dashed Center Card Container Box */}
+        {/* Dashed Center Card Container Box matching Screenshot 2 */}
         <div className="border-2 border-dashed border-gray-300 hover:border-[#FF5722] p-8 rounded-2xl bg-white flex flex-col items-center justify-center text-center shadow-sm max-w-xs w-full animate-in zoom-in-95 duration-200 transition-colors">
           
           {/* Glowing Orange 4-Point AI Sparkles Logo */}
@@ -90,7 +108,7 @@ export default function ExtractionLoadingScreen({ onCompleteExtraction }) {
         <div className="mt-8 flex flex-col items-center w-full max-w-sm">
           <div className="flex items-center justify-between w-full text-xs font-bold text-gray-600 mb-2">
             <span className="flex items-center gap-1.5 text-[#FF5722]">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Processing AI Pipeline
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> NVIDIA Nemotron v2 OCR Pipeline
             </span>
             <span>{progress}%</span>
           </div>
@@ -108,9 +126,9 @@ export default function ExtractionLoadingScreen({ onCompleteExtraction }) {
             {currentStage}
           </p>
 
-          {/* Skip / Force Complete Action */}
+          {/* Skip Action */}
           <button
-            onClick={onCompleteExtraction}
+            onClick={() => onCompleteExtraction(evalResult)}
             className="mt-4 text-[11px] font-bold text-gray-400 hover:text-[#FF5722] transition-colors flex items-center gap-1 cursor-pointer"
           >
             <span>Skip preview & view results</span>

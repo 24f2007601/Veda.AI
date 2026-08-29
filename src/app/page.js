@@ -17,19 +17,23 @@ export default function Home() {
 
   const [uploadedQP, setUploadedQP] = useState(null);
   const [uploadedAS, setUploadedAS] = useState(null);
+  const [evaluationApiData, setEvaluationApiData] = useState(null);
 
   // Triggered when user clicks "Start Mapping" on Upload section
   const handleStartMapping = (qpFile, asFile) => {
     setUploadedQP(qpFile);
     setUploadedAS(asFile);
-    // Switch to Extraction Loading screen matching second screenshot
+    // Switch to Extraction Loading screen with NVIDIA Nemotron OCR
     setViewMode('extracting');
-    // Collapse sidebar to icon-only mode as shown in second screenshot
+    // Collapse sidebar to icon-only mode as shown in screenshot 2 & 3
     setSidebarCollapsed(true);
   };
 
   // Triggered when Extraction completes
-  const handleExtractionComplete = () => {
+  const handleExtractionComplete = (aiResultData) => {
+    if (aiResultData) {
+      setEvaluationApiData(aiResultData);
+    }
     setViewMode('mapping');
   };
 
@@ -58,11 +62,14 @@ export default function Home() {
             viewMode === 'upload' ? (
               <UploadSection onStartMapping={handleStartMapping} />
             ) : viewMode === 'extracting' ? (
-              <ExtractionLoadingScreen onCompleteExtraction={handleExtractionComplete} />
+              <ExtractionLoadingScreen 
+                qpFile={uploadedQP}
+                asFile={uploadedAS}
+                onCompleteExtraction={handleExtractionComplete} 
+              />
             ) : (
               <MappingWorkspace 
-                questionPaper={uploadedQP} 
-                answerSheet={uploadedAS} 
+                apiData={evaluationApiData}
                 onBack={() => setViewMode('upload')} 
               />
             )
