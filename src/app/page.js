@@ -7,13 +7,25 @@ import UploadSection from '@/components/UploadSection';
 import ExtractionLoadingScreen from '@/components/ExtractionLoadingScreen';
 import MappingWorkspace from '@/components/MappingWorkspace';
 import TeacherToolkitModal from '@/components/TeacherToolkitModal';
+import AuthModal from '@/components/AuthModal';
 import { Sparkles, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('exams');
   const [viewMode, setViewMode] = useState('upload'); // 'upload' | 'extracting' | 'mapping'
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  
+  // Modals
   const [toolkitOpen, setToolkitOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
+  // Authenticated Educator State
+  const [currentUser, setCurrentUser] = useState({
+    name: 'Madhur Rastogi',
+    email: 'madhur.rastogi@dpsbokaro.edu.in',
+    school: 'Delhi Public School, Bokaro Steel City',
+    role: 'Senior Evaluator'
+  });
 
   const [uploadedQP, setUploadedQP] = useState(null);
   const [uploadedAS, setUploadedAS] = useState(null);
@@ -49,12 +61,18 @@ export default function Home() {
         }}
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        currentUser={currentUser}
       />
 
       {/* Main Container Column */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         {/* Top Navbar */}
-        <Navbar onOpenToolkit={() => setToolkitOpen(true)} />
+        <Navbar 
+          onOpenToolkit={() => setToolkitOpen(true)} 
+          currentUser={currentUser}
+          onOpenAuthModal={() => setAuthModalOpen(true)}
+          onLogout={() => setCurrentUser(null)}
+        />
 
         {/* Workspace Views Flow */}
         <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
@@ -82,7 +100,7 @@ export default function Home() {
                 {activeTab} Workspace
               </h2>
               <p className="text-sm text-gray-500 max-w-md mt-2">
-                Viewing {activeTab} details for Delhi Public School, Bokaro Steel City. Switch back to <strong>Exams</strong> to upload and evaluate question papers.
+                Viewing {activeTab} details for {currentUser?.school || 'Delhi Public School, Bokaro Steel City'}. Switch back to <strong>Exams</strong> to upload and evaluate question papers.
               </p>
               <button
                 onClick={() => {
@@ -109,6 +127,13 @@ export default function Home() {
             setViewMode('upload');
           }
         }}
+      />
+
+      {/* Educator Auth (Login & Register) Modal */}
+      <AuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)}
+        onLoginSuccess={(user) => setCurrentUser(user)}
       />
     </div>
   );
