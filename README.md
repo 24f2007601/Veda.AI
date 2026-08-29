@@ -4,6 +4,15 @@
 
 ---
 
+## 📂 Google Drive Upload Storage Folder
+
+All uploaded question papers and student answer booklets are organized and archived in the shared Google Drive folder:
+
+- **Google Drive Storage URL**: [https://drive.google.com/drive/folders/1XGTV7IEurZN7Pj4dRVu0cEirYE-gRY31](https://drive.google.com/drive/folders/1XGTV7IEurZN7Pj4dRVu0cEirYE-gRY31)
+- **Folder ID**: `1XGTV7IEurZN7Pj4dRVu0cEirYE-gRY31`
+
+---
+
 ## 🔑 Demo Educator Credentials
 
 For quick demo testing, use the built-in 1-click **Autofill Demo Login** button or sign in with:
@@ -41,9 +50,10 @@ For quick demo testing, use the built-in 1-click **Autofill Demo Login** button 
    ```bash
    cp .env.example .env.local
    ```
-   Add your NVIDIA API key (or use the built-in local fallback):
+   Add your NVIDIA API key & Google Drive configuration:
    ```env
    NVIDIA_API_KEY=nvapi-your_key_from_build.nvidia.com
+   GOOGLE_DRIVE_FOLDER_URL=https://drive.google.com/drive/folders/1XGTV7IEurZN7Pj4dRVu0cEirYE-gRY31
    ```
 
 4. **Run the Next.js Development Server**:
@@ -56,35 +66,15 @@ For quick demo testing, use the built-in 1-click **Autofill Demo Login** button 
 
 ## 🛠 Backend Storage & AI Pipeline Requirements
 
-### 1. Database Storage (PostgreSQL + Prisma / Supabase)
-Store teacher accounts, school profiles, exam metadata, parsed question papers, student submissions, and AI confidence scores.
+### 1. Document Storage (Google Drive / S3 / Supabase)
+For archiving uploaded PDF question papers and high-resolution scanned answer booklets.
 
-#### Recommended Schema Entities:
-- **School Organization**: `id`, `name`, `city`, `logo_url` (e.g., Delhi Public School Bokaro).
-- **Exam Record**: `id`, `subject`, `grade_level`, `qp_file_url`, `total_marks`.
-- **Question Entity**: `id`, `exam_id`, `q_num`, `text`, `max_marks`, `model_answer`.
-- **Student Submission**: `id`, `exam_id`, `student_name`, `roll_num`, `answer_sheet_url`.
-- **Question Mapping Result**: `id`, `submission_id`, `question_id`, `obtained_marks`, `ai_feedback`, `bounding_box_coordinates`.
-
-#### Initialize Prisma Database:
-```bash
-npm install prisma @prisma/client
-npx prisma init
-npx prisma db push
-```
+- **Shared Google Drive Folder**: `1XGTV7IEurZN7Pj4dRVu0cEirYE-gRY31`
+- **Link**: [Open Drive Folder](https://drive.google.com/drive/folders/1XGTV7IEurZN7Pj4dRVu0cEirYE-gRY31)
 
 ---
 
-### 2. Document Object Storage (AWS S3 / Supabase Storage)
-For uploading and serving heavy PDF question papers and high-resolution scanned/photographed answer booklets (<10MB limit per file).
-
-- **Bucket Structure**:
-  - `s3://veda-ai-documents/question-papers/{exam_id}.pdf`
-  - `s3://veda-ai-documents/answer-sheets/{student_id}.pdf`
-
----
-
-### 3. AI OCR & Handwriting Evaluation Microservice (NVIDIA Nemotron v2)
+### 2. AI OCR & Handwriting Evaluation Microservice (NVIDIA Nemotron v2)
 Connect the 3-stage pipeline (Upload -> Extraction -> Mapping):
 
 - **NVIDIA NIM Model**: `meta/llama-3.2-90b-vision-instruct` / `nvidia/llama-3.1-nemotron-70b-instruct`.
@@ -92,13 +82,13 @@ Connect the 3-stage pipeline (Upload -> Extraction -> Mapping):
 
 ---
 
-## 🌐 Production Deployment (Vercel & Docker)
+## 🌐 Production Deployment (Vercel & Render)
 
 ### Option A: Vercel (Recommended for Next.js)
 
 1. Push your code to GitHub / GitLab.
 2. Import the project in [Vercel Dashboard](https://vercel.com/new).
-3. Set the Environment Variables from `.env.example`.
+3. Set Environment Variables from `.env.example`.
 4. Click **Deploy**.
 
 ---

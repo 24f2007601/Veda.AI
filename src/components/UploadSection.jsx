@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Upload, FileText, CheckCircle, Trash2, ArrowRight, AlertCircle, FileCheck2 } from 'lucide-react';
+import { Upload, FileText, CheckCircle, Trash2, ArrowRight, AlertCircle, FileCheck2, FolderUp, ExternalLink } from 'lucide-react';
 import TeacherAvatar from './TeacherAvatar';
 
 export default function UploadSection({ onStartMapping }) {
@@ -15,6 +15,8 @@ export default function UploadSection({ onStartMapping }) {
   const asInputRef = useRef(null);
 
   const [errorMsg, setErrorMsg] = useState('');
+
+  const driveFolderUrl = 'https://drive.google.com/drive/folders/1XGTV7IEurZN7Pj4dRVu0cEirYE-gRY31';
 
   const handleFileChange = (file, type) => {
     setErrorMsg('');
@@ -53,7 +55,22 @@ export default function UploadSection({ onStartMapping }) {
   const bothFilesUploaded = Boolean(questionPaper && answerSheet);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-start py-8 px-4 md:px-8 max-w-5xl mx-auto w-full select-none">
+    <div className="flex-1 flex flex-col items-center justify-start py-6 px-4 md:px-8 max-w-5xl mx-auto w-full select-none">
+      
+      {/* Google Drive Shared Folder Storage Link */}
+      <div className="mb-4">
+        <a
+          href={driveFolderUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-blue-50 hover:bg-blue-100/80 text-blue-700 text-xs font-semibold rounded-full border border-blue-200/80 transition-colors shadow-2xs cursor-pointer"
+        >
+          <FolderUp className="w-4 h-4 text-blue-600" />
+          <span>Uploaded Files Storage (Google Drive)</span>
+          <ExternalLink className="w-3 h-3 text-blue-500" />
+        </a>
+      </div>
+
       {/* Hero Header */}
       <div className="text-center max-w-2xl mx-auto">
         <h1 className="text-3xl md:text-4xl lg:text-[42px] font-extrabold text-gray-900 tracking-tight leading-snug">
